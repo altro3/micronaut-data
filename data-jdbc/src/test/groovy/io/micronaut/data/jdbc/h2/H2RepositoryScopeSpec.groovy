@@ -15,7 +15,10 @@
  */
 package io.micronaut.data.jdbc.h2
 
+import groovy.transform.Memoized
 import io.micronaut.context.BeanContext
+import io.micronaut.context.annotation.Prototype
+import io.micronaut.data.runtime.intercept.DataInterceptorResolver
 import io.micronaut.test.extensions.spock.annotation.MicronautTest
 import jakarta.inject.Inject
 import spock.lang.Shared
@@ -42,5 +45,67 @@ class H2RepositoryScopeSpec extends Specification {
             def instance2 = beanContext.getBean(H2BookDtoRepository)
         then:
             instance1.is(instance2)
+    }
+
+    void "test no memory leak 1"() {
+        when:
+            def dataInterceptor = getDataInterceptor()
+            def instance = beanContext.getBean(H2BookRepository)
+        then:
+            instance.deleteAll()
+            if (i % 1000 == 0) {
+                System.gc()
+            }
+            dataInterceptor.@interceptors.size() < 10000
+        where:
+            i << (1..30000)
+    }
+
+    void "test no memory leak 2"() {
+        when:
+            def dataInterceptor = getDataInterceptor()
+            def instance = bookRepository
+        then:
+            instance.deleteAll()
+            if (i % 1000 == 0) {
+                System.gc()
+            }
+            dataInterceptor.@interceptors.size() < 10000
+        where:
+            i << (1..30000)
+    }
+
+    void "test no memory leak 3"() {
+        when:
+            def dataInterceptor = getDataInterceptor()
+            def myService = beanContext.getBean(MyPrototypeService)
+        then:
+            myService.bookRepository.deleteAll()
+            if (i % 1000 == 0) {
+                System.gc()
+            }
+            dataInterceptor.@interceptors.size() < 10000
+        where:
+            i << (1..30000)
+    }
+
+    @Memoized
+    private DataInterceptorResolver getDataInterceptor() {
+        return beanContext.getBean(DataInterceptorResolver)
+    }
+
+    @Memoized
+    H2BookRepository getBookRepository() {
+        beanContext.getBean(H2BookRepository)
+    }
+
+    @Prototype
+    static class MyPrototypeService {
+
+        final H2BookRepository bookRepository
+
+        MyPrototypeService(H2BookRepository bookRepository) {
+            this.bookRepository = bookRepository
+        }
     }
 }

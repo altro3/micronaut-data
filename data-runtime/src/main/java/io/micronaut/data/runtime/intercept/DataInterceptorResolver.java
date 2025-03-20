@@ -49,7 +49,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @Internal
 @Singleton
-final class DataInterceptorResolver {
+public final class DataInterceptorResolver {
 
     private final RepositoryOperationsRegistry repositoryOperationsRegistry;
     @Nullable

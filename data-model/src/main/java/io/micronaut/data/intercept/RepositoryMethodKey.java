@@ -16,8 +16,10 @@
 package io.micronaut.data.intercept;
 
 import io.micronaut.core.annotation.Internal;
+import io.micronaut.core.type.Argument;
 import io.micronaut.inject.ExecutableMethod;
 
+import java.util.Arrays;
 import java.util.Objects;
 
 /**
@@ -28,8 +30,9 @@ import java.util.Objects;
  */
 @Internal
 public final class RepositoryMethodKey {
-    private final Object repository;
-    private final ExecutableMethod<?, ?> method;
+    private final Class<?> repositoryClass;
+    private final String repositoryMethodName;
+    private final Argument<?>[] repositoryMethodArguments;
     private final int hashCode;
 
     /**
@@ -37,35 +40,26 @@ public final class RepositoryMethodKey {
      * @param method     The method
      */
     public RepositoryMethodKey(Object repository, ExecutableMethod<?, ?> method) {
-        this.repository = repository;
-        this.method = method;
-        this.hashCode = Objects.hash(repository, method);
+        this.repositoryClass = repository.getClass();
+        this.repositoryMethodName = method.getName();
+        this.repositoryMethodArguments = method.getArguments();
+        this.hashCode = Objects.hash(repositoryClass, repositoryMethodName, repositoryMethodArguments.length);
     }
 
-    public Object repository() {
-        return repository;
-    }
-
-    public ExecutableMethod<?, ?> method() {
-        return method;
-    }
 
     @Override
-    public boolean equals(Object obj) {
-        if (obj == this) {
-            return true;
-        }
-        if (obj == null || obj.getClass() != this.getClass()) {
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        var that = (RepositoryMethodKey) obj;
-        return Objects.equals(this.repository, that.repository) &&
-                Objects.equals(this.method, that.method);
+        RepositoryMethodKey that = (RepositoryMethodKey) o;
+        return Objects.equals(repositoryClass, that.repositoryClass)
+            && Objects.equals(repositoryMethodName, that.repositoryMethodName)
+            && Objects.deepEquals(repositoryMethodArguments, that.repositoryMethodArguments);
     }
 
     @Override
     public int hashCode() {
         return hashCode;
     }
-
 }
