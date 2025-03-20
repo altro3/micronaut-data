@@ -42,7 +42,6 @@ public final class RepositoryMethodKey {
         this.hashCode = Objects.hash(repositoryClass, method.getName(), method.getArguments().length);
     }
 
-
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) {
