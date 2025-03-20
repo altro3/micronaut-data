@@ -16,10 +16,8 @@
 package io.micronaut.data.intercept;
 
 import io.micronaut.core.annotation.Internal;
-import io.micronaut.core.type.Argument;
 import io.micronaut.inject.ExecutableMethod;
 
-import java.util.Arrays;
 import java.util.Objects;
 
 /**
@@ -31,8 +29,7 @@ import java.util.Objects;
 @Internal
 public final class RepositoryMethodKey {
     private final Class<?> repositoryClass;
-    private final String repositoryMethodName;
-    private final Argument<?>[] repositoryMethodArguments;
+    private final ExecutableMethod<?, ?> method;
     private final int hashCode;
 
     /**
@@ -41,9 +38,8 @@ public final class RepositoryMethodKey {
      */
     public RepositoryMethodKey(Object repository, ExecutableMethod<?, ?> method) {
         this.repositoryClass = repository.getClass();
-        this.repositoryMethodName = method.getName();
-        this.repositoryMethodArguments = method.getArguments();
-        this.hashCode = Objects.hash(repositoryClass, repositoryMethodName, repositoryMethodArguments.length);
+        this.method = method;
+        this.hashCode = Objects.hash(repositoryClass, method.getName(), method.getArguments().length);
     }
 
 
@@ -54,8 +50,7 @@ public final class RepositoryMethodKey {
         }
         RepositoryMethodKey that = (RepositoryMethodKey) o;
         return Objects.equals(repositoryClass, that.repositoryClass)
-            && Objects.equals(repositoryMethodName, that.repositoryMethodName)
-            && Objects.deepEquals(repositoryMethodArguments, that.repositoryMethodArguments);
+            && Objects.equals(method, that.method);
     }
 
     @Override
