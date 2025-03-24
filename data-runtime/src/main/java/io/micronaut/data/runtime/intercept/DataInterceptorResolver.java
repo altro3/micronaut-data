@@ -16,7 +16,6 @@
 package io.micronaut.data.runtime.intercept;
 
 import io.micronaut.aop.MethodInvocationContext;
-import io.micronaut.context.Qualifier;
 import io.micronaut.core.annotation.AnnotationValue;
 import io.micronaut.core.annotation.Internal;
 import io.micronaut.core.annotation.NonNull;
@@ -36,7 +35,6 @@ import io.micronaut.data.operations.RepositoryOperationsRegistry;
 import io.micronaut.data.runtime.multitenancy.DataSourceTenantResolver;
 import io.micronaut.inject.ArgumentInjectionPoint;
 import io.micronaut.inject.InjectionPoint;
-import io.micronaut.inject.qualifiers.Qualifiers;
 import jakarta.inject.Singleton;
 
 import java.lang.reflect.Modifier;
@@ -75,7 +73,7 @@ public final class DataInterceptorResolver {
             tenantDataSourceName = null;
         }
         TenantRepositoryMethodKey theKey = new TenantRepositoryMethodKey(tenantDataSourceName, key, null);
-        if (tenantDataSourceName == null && injectionPoint instanceof ArgumentInjectionPoint<?,?> argumentInjectionPoint) {
+        if (tenantDataSourceName == null && injectionPoint instanceof ArgumentInjectionPoint<?, ?> argumentInjectionPoint) {
             theKey = new TenantRepositoryMethodKey(tenantDataSourceName, key, argumentInjectionPoint.asArgument());
         }
         // Don't use "computeIfAbsent" to avoid "java.lang.IllegalStateException: Recursive update"
