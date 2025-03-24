@@ -29,7 +29,8 @@ import spock.lang.Specification
 class H2RepositoryScopeSpec extends Specification {
 
     @Inject
-    @Shared BeanContext beanContext
+    @Shared
+    BeanContext beanContext
 
     void "test default repository scope is prototype"() {
         when:
@@ -52,13 +53,10 @@ class H2RepositoryScopeSpec extends Specification {
             def dataInterceptor = getDataInterceptor()
             def instance = beanContext.getBean(H2BookRepository)
         then:
-            instance.deleteAll()
-            if (i % 1000 == 0) {
-                System.gc()
+            for (i in (1..30000)) {
+                instance.deleteAll()
+                dataInterceptor.@interceptors.size() < 10000
             }
-            dataInterceptor.@interceptors.size() < 10000
-        where:
-            i << (1..30000)
     }
 
     void "test no memory leak 2"() {
@@ -66,13 +64,10 @@ class H2RepositoryScopeSpec extends Specification {
             def dataInterceptor = getDataInterceptor()
             def instance = bookRepository
         then:
-            instance.deleteAll()
-            if (i % 1000 == 0) {
-                System.gc()
+            for (i in (1..30000)) {
+                instance.deleteAll()
+                dataInterceptor.@interceptors.size() < 10000
             }
-            dataInterceptor.@interceptors.size() < 10000
-        where:
-            i << (1..30000)
     }
 
     void "test no memory leak 3"() {
@@ -81,12 +76,9 @@ class H2RepositoryScopeSpec extends Specification {
             def myService = beanContext.getBean(MyPrototypeService)
         then:
             myService.bookRepository.deleteAll()
-            if (i % 1000 == 0) {
-                System.gc()
+            for (i in (1..30000)) {
+                dataInterceptor.@interceptors.size() < 10000
             }
-            dataInterceptor.@interceptors.size() < 10000
-        where:
-            i << (1..30000)
     }
 
     @Memoized
@@ -108,4 +100,5 @@ class H2RepositoryScopeSpec extends Specification {
             this.bookRepository = bookRepository
         }
     }
+
 }
